@@ -1,29 +1,25 @@
-function ProductPageCreator(domDetails){
+function ProductPageCreator(domDetails) {
   this.domDetails = domDetails;
   this.sideFilters = domDetails.filter;
   this.footer = domDetails.footer;
   this.productContentArea = domDetails.productContentArea;
   this.allProducts = [];
   this.url = {
-    "BRAND A": false,
-    "BRAND B":false,
-    "BRAND C":false,
-    "BRAND D":false,
-    "Blue":false,
-    "Green":false,
-    "Red":false,
-    "Yellow":false,
-    "available":false,
-    "pages":"20",
-    "pageNumber":"0",
-    "sort":"name",
-    "products": {}
+    brand: [],
+    color: [],
+    available: [],
+    pages: "20",
+    sort: "name",
+    pageNumber: "0"
   }
 }
-ProductPageCreator.prototype.init = function(){
+
+ProductPageCreator.prototype.AvailableFilter = ['brand', 'color', 'available'];
+
+ProductPageCreator.prototype.init = function() {
   this.getJsonData();
 }
-ProductPageCreator.prototype.getJsonData = function(){
+ProductPageCreator.prototype.getJsonData = function() {
   var _this = this;
   $.ajax({
     url: "product.json",
@@ -32,34 +28,36 @@ ProductPageCreator.prototype.getJsonData = function(){
   }).done(_this.onJsonSuccess);
 };
 
-ProductPageCreator.prototype.onJsonSuccess = function(data){
+ProductPageCreator.prototype.onJsonSuccess = function(data) {
   var _this = this;
-  $.each(data, function(key, value){
+  $.each(data, function(key, value) {
     _this.createProduct(value);
   });
 
   var hash = window.location.hash;
-  if(hash.length > 0){
+  if (hash.length > 0) {
     _this.onHashPresent();
   } else {
     this.createSideFilter();
-    _this.url["products"] = this.allProducts;
     Product.show(0, this.allProducts.length - 1, this.allProducts, this.productContentArea);
   }
 }
 
-ProductPageCreator.prototype.createProduct = function(value){
+ProductPageCreator.prototype.createProduct = function(value) {
   var product = new Product(value);
   this.allProducts.push(product);
 }
 
-ProductPageCreator.prototype.createSideFilter = function(url){
-  if(url === undefined){url = this.url}
+ProductPageCreator.prototype.createSideFilter = function(url) {
+  if (url === undefined) {
+    url = this.url
+  }
   var domDetails = {
     sideFilters: this.sideFilters,
     productContentArea: this.productContentArea,
     footer: this.footer,
-    url: url
+    url: url,
+    allProducts: this.allProducts
   }
   var brandFilter = new Filter("brand", this.allProducts, domDetails);
   brandFilter.init();
@@ -70,57 +68,51 @@ ProductPageCreator.prototype.createSideFilter = function(url){
   var soldFilter = new Filter("available", this.allProducts, domDetails);
   soldFilter.init();
 
-  var optionValues = [[this.allProducts.length, "all"], ["3","3"], ["6","6"], ["9","9"]];
+  var optionValues = [
+    [this.allProducts.length, "all"],
+    ["3", "3"],
+    ["6", "6"],
+    ["9", "9"]
+  ];
 
-  var pageSelectBox = new SelectBox("pages", optionValues, domDetails);
-  pageSelectBox.init();
+  var pageDropdown = new Dropdown("pages", optionValues, domDetails);
+  pageDropdown.init();
 
-  var optionValues = [["name", "Sort by Name"], ["color", "Sort by Color"], ["available", "Sort by Availability"], ["brand", "Sort by Brand"]];
-  var sortSelectBox = new SelectBox("sort", optionValues, domDetails);
-  sortSelectBox.init();
+  var optionValues = [
+    ["name", "Sort by Name"],
+    ["color", "Sort by Color"],
+    ["available", "Sort by Availability"],
+    ["brand", "Sort by Brand"]
+  ];
+  var sortDropdown = new Dropdown("sort", optionValues, domDetails);
+  sortDropdown.init();
 }
 
-ProductPageCreator.prototype.onHashPresent = function(){
+ProductPageCreator.prototype.onHashPresent = function() {
   var hash = window.location.hash;
   hash = decodeURIComponent(hash);
-  hash = JSON.parse(hash.substring(1, hash.length));
-
-  this.url = hash;
-
+  this.url = JSON.parse(hash.substring(1, hash.length));
   this.createSideFilter(this.url);
+  var buttonNumber = this.url["pageNumber"];
 
-  for(var prop in this.url){
-    if(prop == "available") {
-      $("input[name='available']").prop('checked', this.url["available"]);
-      break;
+  var urlInputElement;
+  for (var i = 0; i < this.AvailableFilter.length; i++) {
+    if (this.url[this.AvailableFilter[i]].length > 0) {
+      this.url[this.AvailableFilter[i]].forEach(function(element) {
+        urlInputElement = $("input[value='" + element + "']").prop("checked", true);
+      });
     }
-    $("input[value='" + prop + "']").prop('checked', this.url[prop]);
   }
-
-  //sorting
-  var visibleProducts = this.url["products"];
-  var sortSelectedValue = this.url["sort"];
-  $("option[value=" + sortSelectedValue + "]").prop('selected', true);
-  SelectBox.onSortClickEvent(sortSelectedValue, visibleProducts);
-
-  //pagination
-  var selectedValue = this.url["pages"];
-  $("option[value=" + selectedValue + "]").prop('selected', true);
-  SelectBox.setSelectedPageValue(selectedValue);
-
-  var buttonNumber = this.url["pageNumber"] ;
-  var start = buttonNumber * + selectedValue;
-  var end = start + +selectedValue - 1;
-
-  var footer = new Footer(visibleProducts, selectedValue, this.domDetails);
-  footer.init();
-  footer.highlightButton(buttonNumber);
-  Product.show(start, end, visibleProducts, this.productContentArea);
-
+  if (urlInputElement) {
+    urlInputElement.triggerHandler('click', true);
+  }
+  $("option[value=" + this.url["pages"] + "]").prop('selected', true).trigger("change");
+  $("option[value=" + this.url["sort"] + "]").prop('selected', true).trigger("change");
+  $(".page-number").eq(buttonNumber).trigger("click");
 }
 
 ///////////////////////////////////////////////////////////
-$(document).ready(function(){
+$(document).ready(function() {
   var domDetails = {
     productContentArea: $("#content"),
     filter: $("#filters"),
@@ -128,6 +120,4 @@ $(document).ready(function(){
   }
   var productPageCreator = new ProductPageCreator(domDetails);
   productPageCreator.init();
-
-
 })
