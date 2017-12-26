@@ -39,7 +39,7 @@ ProductPageCreator.prototype.onJsonSuccess = function(data) {
     _this.onHashPresent();
   } else {
     this.createSideFilter();
-    Product.show(0, this.allProducts.length - 1, this.allProducts, this.productContentArea);
+    Product.show(0, this.allProducts.length - 1, this.allProducts, this.productContentArea, this.dropdown);
   }
 }
 
@@ -57,35 +57,41 @@ ProductPageCreator.prototype.createSideFilter = function(url) {
     productContentArea: this.productContentArea,
     footer: this.footer,
     url: url,
-    allProducts: this.allProducts
+    allProducts: this.allProducts,
   }
-  var brandFilter = new Filter("brand", this.allProducts, domDetails);
+  var pageOptions = {
+    name: "pages",
+    options: [
+      [this.allProducts.length, "all"],
+      ["3", "3"],
+      ["6", "6"],
+      ["9", "9"]
+    ]
+  };
+  var sortOptions = {
+    name: "sort",
+    options: [
+      ["name", "Sort by Name"],
+      ["color", "Sort by Color"],
+      ["available", "Sort by Availability"],
+      ["brand", "Sort by Brand"]
+    ]
+  };
+
+  var options = [pageOptions, sortOptions];
+  this.dropdown = new SortPageDropdown(options, domDetails);
+
+
+  var brandFilter = new Filter("brand", this.allProducts, domDetails, this.dropdown);
   brandFilter.init();
 
-  var colorFilter = new Filter("color", this.allProducts, domDetails);
+  var colorFilter = new Filter("color", this.allProducts, domDetails, this.dropdown);
   colorFilter.init();
 
-  var soldFilter = new Filter("available", this.allProducts, domDetails);
+  var soldFilter = new Filter("available", this.allProducts, domDetails, this.dropdown);
   soldFilter.init();
 
-  var optionValues = [
-    [this.allProducts.length, "all"],
-    ["3", "3"],
-    ["6", "6"],
-    ["9", "9"]
-  ];
-
-  var pageDropdown = new Dropdown("pages", optionValues, domDetails);
-  pageDropdown.init();
-
-  var optionValues = [
-    ["name", "Sort by Name"],
-    ["color", "Sort by Color"],
-    ["available", "Sort by Availability"],
-    ["brand", "Sort by Brand"]
-  ];
-  var sortDropdown = new Dropdown("sort", optionValues, domDetails);
-  sortDropdown.init();
+  this.dropdown.init();
 }
 
 ProductPageCreator.prototype.onHashPresent = function() {
@@ -95,6 +101,13 @@ ProductPageCreator.prototype.onHashPresent = function() {
   this.createSideFilter(this.url);
   var buttonNumber = this.url["pageNumber"];
 
+  this.checkInputsInUrl();
+  $("option[value=" + this.url["pages"] + "]").prop('selected', true).trigger("change");
+  $("option[value=" + this.url["sort"] + "]").prop('selected', true).trigger("change");
+  $(".page-number").eq(buttonNumber).trigger("click");
+}
+
+ProductPageCreator.prototype.checkInputsInUrl = function() {
   var urlInputElement;
   for (var i = 0; i < this.AvailableFilter.length; i++) {
     if (this.url[this.AvailableFilter[i]].length > 0) {
@@ -106,9 +119,6 @@ ProductPageCreator.prototype.onHashPresent = function() {
   if (urlInputElement) {
     urlInputElement.triggerHandler('click', true);
   }
-  $("option[value=" + this.url["pages"] + "]").prop('selected', true).trigger("change");
-  $("option[value=" + this.url["sort"] + "]").prop('selected', true).trigger("change");
-  $(".page-number").eq(buttonNumber).trigger("click");
 }
 
 ///////////////////////////////////////////////////////////
