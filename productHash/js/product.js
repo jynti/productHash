@@ -1,21 +1,19 @@
-function Product(value) {
+function Product(value){
   this.brand = value.brand;
   this.color = value.color;
   this.name = value.name;
   this.available = value.sold_out;
   this.url = value.url;
 }
-Product.show = function(from, to, visibleProducts, productContentArea) {
-  productContentArea.empty();
-  if (to > visibleProducts.length - 1) {
-    to = visibleProducts.length - 1;
-  }
 
-  var sortValue = Dropdown.getPresentlySelectedSortValue();
-  visibleProducts = Dropdown.onSortClickEvent(sortValue, visibleProducts);
+Product.show = function(from, to, visibleProducts, productContentArea, dropdown){
+  productContentArea.empty();
+  if( to > visibleProducts.length - 1 ){ to = visibleProducts.length -1; }
+  var sortValue = dropdown.selectedValues["sort"];
+  visibleProducts = dropdown.onSortClickEvent(sortValue, visibleProducts);
 
   this.allVisibleProducts = visibleProducts;
-  for (var i = from; i <= to; i++) {
+  for(var i = from; i <= to; i++){
     var element = visibleProducts[i];
 
     var productDiv = $("<div></div>").addClass("product-class");
@@ -26,6 +24,6 @@ Product.show = function(from, to, visibleProducts, productContentArea) {
   }
 }
 
-Product.getVisibleProducts = function() {
+Product.getVisibleProducts = function(){
   return this.allVisibleProducts;
 }
