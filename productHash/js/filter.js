@@ -1,4 +1,4 @@
-function Filter(name, allProducts, domDetails) {
+function Filter(name, allProducts, domDetails, dropdown) {
   this.name = name;
   this.allProducts = allProducts;
   this.sideFilters = domDetails.sideFilters;
@@ -6,6 +6,7 @@ function Filter(name, allProducts, domDetails) {
   this.footer = domDetails.footer;
   this.url = domDetails.url;
   this.subFilters = [];
+  this.dropdown = dropdown;
 }
 
 Filter.prototype.AvailableFilter = ['brand', 'color', 'available'];
@@ -107,20 +108,20 @@ Filter.prototype.createFooter = function(visibleProducts) {
   var domDetails = {
     footer: this.footer,
     productContentArea: this.productContentArea,
-    url: this.url
+    url: this.url,
+    dropdown: this.dropdown
   }
-  var selectedPagination = Dropdown.getPresentlySelectedValue();
-
+  var selectedPagination = this.dropdown.selectedValues["pages"];
   var footer = new Footer(visibleProducts, selectedPagination, domDetails);
   footer.init();
   footer.highlightButton(0);
 }
 
 Filter.prototype.showProducts = function(visibleProducts) {
-  var selectedValue = Dropdown.getPresentlySelectedValue();
+  var selectedValue = this.dropdown.selectedValues["pages"];
   if (selectedValue < visibleProducts.length) {
-    Product.show(0, selectedValue - 1, visibleProducts, this.productContentArea);
+    Product.show(0, selectedValue - 1, visibleProducts, this.productContentArea, this.dropdown);
   } else {
-    Product.show(0, visibleProducts.length - 1, visibleProducts, this.productContentArea);
+    Product.show(0, visibleProducts.length - 1, visibleProducts, this.productContentArea, this.dropdown);
   }
 }
