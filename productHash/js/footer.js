@@ -4,6 +4,7 @@ function Footer(visibleProducts, selectedPagination, domElements) {
   this.footer = domElements.footer;
   this.productContentArea = domElements.productContentArea;
   this.url = domElements.url;
+  this.dropdown = domElements.dropdown;
 }
 
 Footer.prototype.init = function() {
@@ -16,7 +17,6 @@ Footer.prototype.numberOfButtonsToCreate = function() {
 }
 
 Footer.prototype.createButtons = function() {
-  var _this = this;
   this.footer.empty();
   var buttons = [];
   for (var buttonNumber = 0; buttonNumber < this.numberOfButtonsToCreate; buttonNumber++) {
@@ -24,20 +24,24 @@ Footer.prototype.createButtons = function() {
     buttons.push(pageNumber);
   }
   this.footer.append(buttons);
+  this.onButtonClick();
+}
+
+Footer.prototype.onButtonClick = function() {
+  var _this = this;
   $(".page-number").on("click", function() {
     var buttonNumber = $(this).data("button-number");
     _this.url["pageNumber"] = buttonNumber;
     window.location.hash = JSON.stringify(_this.url);
-    _this.onButtonClick(buttonNumber);
-  })
-
+    _this.display(buttonNumber);
+  });
 }
 
-Footer.prototype.onButtonClick = function(buttonNumber) {
+Footer.prototype.display = function(buttonNumber) {
   var fromProduct = buttonNumber * (+this.selectedPagination);
   var tillProduct = fromProduct + (+this.selectedPagination) - 1;
   this.highlightButton(buttonNumber);
-  Product.show(fromProduct, tillProduct, this.visibleProducts, this.productContentArea);
+  Product.show(fromProduct, tillProduct, this.visibleProducts, this.productContentArea, this.dropdown);
 }
 
 
