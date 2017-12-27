@@ -1,4 +1,4 @@
-function SortPageDropdown(options, domDetails) {
+function ProductSorter(options, domDetails) {
   this.sideFilter = domDetails.sideFilters;
   this.productContentArea = domDetails.productContentArea;
   this.url = domDetails.url;
@@ -8,11 +8,11 @@ function SortPageDropdown(options, domDetails) {
   this.selectedValues = {};
 }
 
-SortPageDropdown.prototype.init = function() {
+ProductSorter.prototype.init = function() {
   this.createDropdowns();
 }
 
-SortPageDropdown.prototype.createDropdowns = function() {
+ProductSorter.prototype.createDropdowns = function() {
   var _this = this;
   this.options.forEach(function(dropdownType) {
     _this.createOptions(dropdownType);
@@ -20,7 +20,7 @@ SortPageDropdown.prototype.createDropdowns = function() {
   });
 }
 
-SortPageDropdown.prototype.createOptions = function(dropdownType) {
+ProductSorter.prototype.createOptions = function(dropdownType) {
   var selectBox = $("<select></select>").addClass("select-box");
   var name = dropdownType.name;
   var dropdownOptions = dropdownType.options;
@@ -36,7 +36,7 @@ SortPageDropdown.prototype.createOptions = function(dropdownType) {
   this.sideFilter.append("<hr>");
 }
 
-SortPageDropdown.prototype.onChangeEvent = function(selectBox, name) {
+ProductSorter.prototype.onChangeEvent = function(selectBox, name) {
   var _this = this;
   selectBox.on("change", function() {
     _this.selectedValues[name] = $(this).val();
@@ -46,7 +46,7 @@ SortPageDropdown.prototype.onChangeEvent = function(selectBox, name) {
   });
 }
 
-SortPageDropdown.prototype.display = function() {
+ProductSorter.prototype.display = function() {
   this.visibleProducts = Product.getVisibleProducts();
   if (!this.visibleProducts) this.visibleProducts = this.allProducts;
   this.createFooter();
@@ -54,7 +54,7 @@ SortPageDropdown.prototype.display = function() {
   Product.show(0, selectedPagination - 1, this.visibleProducts, this.productContentArea, this);
 }
 
-SortPageDropdown.prototype.onSortClickEvent = function(selectedValue, visibleProducts) {
+ProductSorter.prototype.onSortClickEvent = function(selectedValue, visibleProducts) {
   if (selectedValue == "name" || selectedValue == "available") {
     visibleProducts = this.sortByNumbers(selectedValue, visibleProducts);
   } else {
@@ -63,21 +63,21 @@ SortPageDropdown.prototype.onSortClickEvent = function(selectedValue, visiblePro
   return visibleProducts;
 }
 
-SortPageDropdown.prototype.sortByNumbers = function(selectedValue, visibleProducts) {
+ProductSorter.prototype.sortByNumbers = function(selectedValue, visibleProducts) {
   visibleProducts.sort(function(product1, product2) {
     return product1[selectedValue] - product2[selectedValue];
   });
   return visibleProducts;
 }
 
-SortPageDropdown.prototype.sortByWord = function(selectedValue, visibleProducts) {
+ProductSorter.prototype.sortByWord = function(selectedValue, visibleProducts) {
   visibleProducts.sort(function(product1, product2) {
     return product1[selectedValue].toUpperCase() > product2[selectedValue].toUpperCase()
   });
   return visibleProducts;
 }
 
-SortPageDropdown.prototype.createFooter = function() {
+ProductSorter.prototype.createFooter = function() {
   var domDetails = {
     footer: this.footer,
     productContentArea: this.productContentArea,
