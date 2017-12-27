@@ -79,7 +79,7 @@ ProductPageCreator.prototype.createSideFilter = function(url) {
   };
 
   var options = [pageOptions, sortOptions];
-  this.dropdown = new SortPageDropdown(options, domDetails);
+  this.dropdown = new ProductSorter(options, domDetails);
 
 
   var brandFilter = new Filter("brand", this.allProducts, domDetails, this.dropdown);
